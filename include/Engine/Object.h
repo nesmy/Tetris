@@ -5,11 +5,14 @@
 namespace BB {
   class Object : public CommandListener{
   public:
-    Object();
-    virtual ~Object();
-    virtual bool update(bool onGround);
-    virtual void Draw();
-    virtual Rectangle getBoundingBox();
+    Object(){}
+    virtual ~Object(){}
+    virtual bool update(bool onGround){return true;}
+    virtual void Draw(){}
+    virtual Rectangle getBoundingBox(){
+      Rectangle result = {Position.x, Position.y, (float)Texture.width, (float)Texture.height};
+      return result;
+    }
     virtual void goUp(){
     }
     // {

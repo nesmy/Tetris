@@ -3,19 +3,24 @@
 #include "Renderer.h"
 #include "Scene.h"
 #include "Window.h"
+#include <memory>
 
 namespace BB {
   template <class scene>
   class Application{
   public:
-    Application(){
-      window = new Window(WIDTH, HEIGHT, "Pong");
-      renderer = new Renderer();
-      inputHandler = new InputHandler();
+    Application(int width, int height, const char* title){
+      window = std::make_unique<Window>(width, height, title);
+      renderer = std::make_unique<Renderer>();
+      inputHandler = std::make_unique<InputHandler>();
       currScene = std::make_shared<scene>();
       currScene->loadResources();
       currScene->start();
       
+    }
+
+    ~Application(){
+      std::cout << "outApp" << std::endl;
     }
 
     void RunLoop(){
@@ -33,9 +38,9 @@ namespace BB {
       }
     }
   private:
-    Window *window;
-    Renderer* renderer;
-    InputHandler* inputHandler;
+    std::unique_ptr<Window> window;
+    std::unique_ptr<Renderer> renderer;
+    std::unique_ptr<InputHandler> inputHandler;
   public:
     std::shared_ptr<Scene> currScene;
   };

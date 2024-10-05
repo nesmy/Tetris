@@ -1,11 +1,12 @@
 #pragma once
 
 #include "CommandListener.h"
+#include "Object.h"
 #include "Config.h"
 
 namespace BB {
 
-  class Object;
+  // class Object;
   /** Base class for "scenes"
    * A Scene is a "place where action occurs" It can be title screen, a loading screen,
    * a cut-scene, or an entire world in which players, actors, and other objects interact.
@@ -20,25 +21,33 @@ namespace BB {
    */
   class Scene : public CommandListener {
   public:
-    Scene();
-    virtual ~Scene();
+    Scene(){
+      int sceneHeight = GetScreenHeight();
+      groundYPos = (3 * sceneHeight) / 4;
+      gravity = 1;
+      exit = false;
+    }
+    virtual ~Scene(){freeResources();}
 
     /** Loads the resources needed to display this scene (e.g, the entire game level).
      *
      * @throws std::runtime_error if something went wrong
      */
-    virtual void loadResources();
+    virtual void loadResources(){}
 
     /** Frees up the resources used in this scene.
      * The default behaviour is to empty this object of all items, e.g., the objects, playerAvatar, etc.
      */
-    virtual void freeResources();
+    virtual void freeResources(){
+      playerAvatar.reset();
+      Objects.clear();
+    }
 
     /** Called when the scene starts.
      * This should start any background music or sound, and perform any other initialization
      * that isn't already handled by loadResources()
      */
-    virtual void start();
+    virtual void start(){}
 
     /** Updates the scene.
      * This should perform tasks such as:
@@ -48,22 +57,96 @@ namespace BB {
      *
      * @return std::shared_ptr<Scene> the next scene, or nullptr if this scene
      */
-    virtual std::shared_ptr<Scene> update();
+    virtual std::shared_ptr<Scene> update(){
+      // for(auto &object : ResourceManager::GetObjects()){
+      //   Objects.emplace_back(object);
+      // }
+      for(auto &object : Objects){
+      // object->Position.x += object->Velocity.x;
+      // object->Position.y += object->Velocity.y;
+
+	auto boundingRect = object->getBoundingBox();
+	auto distToGround = groundYPos - (boundingRect.y + boundingRect.height);
+	bool isOnGround = distToGround <= 0;
+	
+	if(isOnGround){
+	  // object->Velocity.y = 0;
+	  // object->Position.y += distToGround;
+	} else {
+	  // object->Velocity.y += gravity;
+	}
+	
+	object->update(isOnGround);
+      }
+      
+      // if(exit){
+	// exit = false;
+	// return std::make_unique<MenuScene>();
+      // }
+      // else {
+	return nullptr;
+      // }
+    }
 
     /** Returns true if the program should quit.
      */
-    virtual bool shouldQuit();
+    virtual bool shouldQuit() { return false;}
 
     /** Draws the scene to display.
      */
-    virtual void Draw();
-    virtual void goUp();
-    virtual void goLeft();
-    virtual void goRight();
-    virtual void goDown();
-    virtual void goNowhere();
-    virtual void doInteractWith();
-    virtual void doExit();
+    virtual void Draw(){
+      ClearBackground(BLACK);
+      // for(auto &object : BB::ResourceManager::GetObjects()){
+      //   object->Draw();
+      // }
+      if(Objects.size()){
+	for(auto &object : Objects){
+	  object->Draw();
+	}
+      } else{
+	// DrawText("This scene has no content. Add some objects, or override Scene::Draw()", 20, 20, 20, RED);
+      }
+    }
+
+    virtual void goUp(){
+    if(playerAvatar){
+      playerAvatar->goUp();
+    }
+  }
+
+  virtual void goLeft(){
+    if(playerAvatar){
+      playerAvatar->goLeft();
+    }
+  }
+
+  virtual void goRight(){
+    if(playerAvatar){
+      playerAvatar->goRight();
+    }
+  }
+
+  virtual void goDown(){
+    if(playerAvatar){
+      playerAvatar->goDown();
+    }
+  }
+
+  virtual void goNowhere(){
+    if(playerAvatar){
+      playerAvatar->goNowhere();
+    }
+  }
+
+  virtual void doInteractWith(){
+    if(playerAvatar){
+      playerAvatar->doInteractWith();
+    }
+  }
+
+  virtual void doExit(){
+    exit = true;
+  }
 
   protected:
     /** The player's avatar.

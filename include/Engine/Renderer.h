@@ -8,6 +8,7 @@ namespace BB {
     Renderer(){
     }
     ~Renderer(){
+      std::cout << "outRender" << std::endl;
     }
 
     void Render(std::shared_ptr<Scene> &currScene){
