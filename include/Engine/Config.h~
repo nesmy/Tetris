@@ -1,9 +1,0 @@
-#pragma once
-#include "raylib.h"
-#include <map>
-#include <string>
-#include <vector>
-#include <iostream>
-
-#define WIDTH 802
-#define HEIGHT 502
