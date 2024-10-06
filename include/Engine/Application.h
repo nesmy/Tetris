@@ -20,7 +20,6 @@ namespace BB {
     }
 
     ~Application(){
-      std::cout << "outApp" << std::endl;
     }
 
     void RunLoop(){

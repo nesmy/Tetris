@@ -10,7 +10,6 @@ class Window {
     SetExitKey(KEY_NULL);
   }
   ~Window(){
-    std::cout << "outwindow" << std::endl;
     CloseAudioDevice();
     CloseWindow();
   }
