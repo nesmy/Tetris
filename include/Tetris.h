@@ -17,6 +17,8 @@ class Tetris : public BB::Scene{
     grid = std::make_unique<Grid>();
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
+    currentBlock->gameOver = gameOver;
+    currentBlock->grid = grid;
     nextBlock = GetRandomBlock();
     // Objects.emplace_back(grid);
 
@@ -24,6 +26,27 @@ class Tetris : public BB::Scene{
     //   Objects.emplace_back(block);
     // }
     playerAvatar = currentBlock; 
+  }
+
+  bool EventTriggered(double interval)
+{
+    double currentTime = GetTime();
+    if (currentTime - lastUpdateTime >= interval)
+    {
+        lastUpdateTime = currentTime;
+        return true;
+    }
+    return false;
+}
+
+  void MoveBlockDown(){
+    if(!gameOver){
+      currentBlock->Move(1, 0);
+      if(currentBlock->IsBlockOutside() || currentBlock->BlockFits() == false){
+	currentBlock->Move(-1, 0);
+	currentBlock->LockBlock();
+      }
+    }
   }
 
   std::shared_ptr<Block> GetRandomBlock(){
@@ -45,7 +68,9 @@ class Tetris : public BB::Scene{
 
   virtual std::shared_ptr<BB::Scene> update() override {
     BB::Scene::update();
-
+    if(EventTriggered(0.2)){
+      MoveBlockDown();
+    }
     return nullptr;
   }
 
@@ -62,5 +87,8 @@ private:
   std::vector<std::shared_ptr<Block>> blocks;
   std::shared_ptr<Block> currentBlock;
   std::shared_ptr<Block> nextBlock;
+  double lastUpdateTime = 0;
+  bool gameOver = false;
+  
   
 };
