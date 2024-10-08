@@ -42,9 +42,9 @@ class Tetris : public BB::Scene{
   void MoveBlockDown(){
     if(!gameOver){
       currentBlock->Move(1, 0);
-      if(currentBlock->IsBlockOutside() || currentBlock->BlockFits() == false){
+      if(IsBlockOutside() || BlockFits() == false){
 	currentBlock->Move(-1, 0);
-	currentBlock->LockBlock();
+        LockBlock();
       }
     }
   }
@@ -66,8 +66,34 @@ class Tetris : public BB::Scene{
 	    std::make_unique<ZBlock>()};
   }
 
+  void handleInput(){
+    int keyPressed = GetKeyPressed();
+    if (gameOver && keyPressed != 0)
+    {
+        gameOver = false;
+        Reset();
+    }
+    switch (keyPressed)
+    {
+    case KEY_LEFT:
+        MoveBlockLeft();
+        break;
+    case KEY_RIGHT:
+        MoveBlockRight();
+        break;
+    case KEY_DOWN:
+        MoveBlockDown();
+        // UpdateScore(0, 1);
+        break;
+    case KEY_UP:
+        RotateBlock();
+        break;
+    }
+  }
+
   virtual std::shared_ptr<BB::Scene> update() override {
     BB::Scene::update();
+    handleInput();
     if(EventTriggered(0.2)){
       MoveBlockDown();
     }
@@ -79,10 +105,106 @@ class Tetris : public BB::Scene{
     Color darkBlue = {44, 44, 127, 255};
     ClearBackground(darkBlue);
     grid->Draw();
-    currentBlock->Draw();
+    currentBlock->Draw(11, 11);
+    switch (nextBlock->id)
+    {
+    case 3:
+        nextBlock->Draw(255, 290);
+        break;
+    case 4:
+        nextBlock->Draw(255, 280);
+        break;
+    default:
+        nextBlock->Draw(270, 270);
+        break;
+    }
   }
 
   std::shared_ptr<Grid> grid;
+private:
+  void MoveBlockLeft(){
+    if (!gameOver)
+      {
+        currentBlock->Move(0, -1);
+        if (IsBlockOutside() || BlockFits() == false)
+        {
+            currentBlock->Move(0, 1);
+        }
+    }
+  }
+  void MoveBlockRight(){
+    if (!gameOver)
+    {
+        currentBlock->Move(0, 1);
+        if (IsBlockOutside() || BlockFits() == false)
+        {
+            currentBlock->Move(0, -1);
+        }
+    }
+  }
+
+  bool IsBlockOutside(){
+    std::vector<PositionCell> tiles = currentBlock->GetCellPositions();
+    for (PositionCell item : tiles)
+    {
+        if (grid->IsCellOutside(item.row, item.column))
+        {
+            return true;
+        }
+    }
+    return false;
+  }
+  void RotateBlock(){
+    if (!gameOver)
+    {
+        currentBlock->Rotate();
+        if (IsBlockOutside() || BlockFits() == false)
+        {
+            currentBlock->UndoRotation();
+        }
+        else
+        {
+            // PlaySound(rotateSound);
+        }
+    }
+  }
+  void LockBlock(){
+    std::vector<PositionCell> tiles = currentBlock->GetCellPositions();
+    for (PositionCell item : tiles)
+    {
+        grid->grid[item.row][item.column] = currentBlock->id;
+    }
+    currentBlock = nextBlock;
+    if (BlockFits() == false)
+    {
+        gameOver = true;
+    }
+    nextBlock = GetRandomBlock();
+    int rowsCleared = grid->ClearFullRows();
+    if (rowsCleared > 0)
+    {
+        // PlaySound(clearSound);
+        // UpdateScore(rowsCleared, 0);
+    }
+  }
+  bool BlockFits(){
+    std::vector<PositionCell> tiles = currentBlock->GetCellPositions();
+    for (PositionCell item : tiles)
+    {
+        if (grid->IsCellEmpty(item.row, item.column) == false)
+        {
+            return false;
+        }
+    }
+    return true;
+  }
+  void Reset(){
+    grid->Init();
+    blocks = GetAllBlocks();
+    currentBlock = GetRandomBlock();
+    nextBlock = GetRandomBlock();
+    // score = 0;
+  }
 private:
   std::vector<std::shared_ptr<Block>> blocks;
   std::shared_ptr<Block> currentBlock;

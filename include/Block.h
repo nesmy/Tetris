@@ -21,18 +21,11 @@ class Block : public BB::Object{
   ~Block();
 
   virtual void Draw() override;
+  
   void Move(int rows, int column);
+  void Draw(int offsetX, int offsetY);
   void Rotate();
   void UndoRotation();
-  virtual void goLeft() override;
-  virtual void goRight() override;
-  virtual void goUp() override;
-  virtual void goDown() override;
-
-  bool IsBlockOutside();
-  bool BlockFits();
-  void LockBlock();
- private:
   std::vector<PositionCell> GetCellPositions();
  public:
   int id;
