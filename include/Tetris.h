@@ -1,6 +1,8 @@
 #pragma once
 #include "Block.h"
 #include "Blocks.h"
+#include "Colors.h"
+#include "ResourceManager.h"
 #include "Scene.h"
 #include "Grid.h"
 
@@ -14,6 +16,10 @@ class Tetris : public BB::Scene{
   }
 
   virtual void loadResources() override{
+    BB::ResourceManager::LoadFont("Resources/Font/monogram.ttf", "monogram");
+    PlayMusicStream(BB::ResourceManager::LoadMusic("Resources/Sounds/music.mp3", "Music"));
+    BB::ResourceManager::LoadSound("Resources/Sounds/rotate.mp3", "RotateSound");
+    BB::ResourceManager::LoadSound("Resources/Sounds/clear.mp3", "ClearSound");
     grid = std::make_unique<Grid>();
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
@@ -83,7 +89,7 @@ class Tetris : public BB::Scene{
         break;
     case KEY_DOWN:
         MoveBlockDown();
-        // UpdateScore(0, 1);
+        UpdateScore(0, 1);
         break;
     case KEY_UP:
         RotateBlock();
@@ -93,6 +99,7 @@ class Tetris : public BB::Scene{
 
   virtual std::shared_ptr<BB::Scene> update() override {
     BB::Scene::update();
+    UpdateMusicStream(BB::ResourceManager::GetMusic("Music"));
     handleInput();
     if(EventTriggered(0.2)){
       MoveBlockDown();
@@ -102,10 +109,19 @@ class Tetris : public BB::Scene{
 
   virtual void Draw() override{
     BB::Scene::Draw();
-    Color darkBlue = {44, 44, 127, 255};
     ClearBackground(darkBlue);
+    DrawTextEx(BB::ResourceManager::GetFont("monogram"),"Score",{365, 15}, 38, 2, WHITE);
+    DrawTextEx(BB::ResourceManager::GetFont("monogram"),"Next",{370, 175}, 38, 2, WHITE);
+    DrawRectangleRounded({320, 55, 170, 60}, 0.3, 6, lightBlue);
+
+    char scoreText[10];
+    sprintf(scoreText, "%d", score);
+    Vector2 textSize = MeasureTextEx(BB::ResourceManager::GetFont("monogram"), scoreText, 38, 2);
+    
+    DrawTextEx(BB::ResourceManager::GetFont("monogram"),scoreText,{320 + (170 - textSize.x)/2, 65}, 38, 2, WHITE);
+    DrawRectangleRounded({320, 215, 170, 180}, 0.3, 6, lightBlue);
     grid->Draw();
-    currentBlock->Draw(11, 11);
+    currentBlock->Draw();
     switch (nextBlock->id)
     {
     case 3:
@@ -119,9 +135,27 @@ class Tetris : public BB::Scene{
         break;
     }
   }
-
+public:
   std::shared_ptr<Grid> grid;
 private:
+  void UpdateScore(int linesCleared, int moveDownPoints){
+    switch(linesCleared)
+      {
+      case 1:
+	score += 100;
+	break;
+      case 2:
+	score += 300;
+	break;
+      case 3:
+	score += 500;
+	break;
+      default:
+	break;
+      }
+
+    score += moveDownPoints;
+  }
   void MoveBlockLeft(){
     if (!gameOver)
       {
@@ -164,7 +198,7 @@ private:
         }
         else
         {
-            // PlaySound(rotateSound);
+	  PlaySound(BB::ResourceManager::GetSound("RotateSound"));
         }
     }
   }
@@ -183,8 +217,8 @@ private:
     int rowsCleared = grid->ClearFullRows();
     if (rowsCleared > 0)
     {
-        // PlaySound(clearSound);
-        // UpdateScore(rowsCleared, 0);
+      PlaySound(BB::ResourceManager::GetSound("ClearSound"));
+      UpdateScore(rowsCleared, 0);
     }
   }
   bool BlockFits(){
@@ -203,7 +237,7 @@ private:
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
     nextBlock = GetRandomBlock();
-    // score = 0;
+    score = 0;
   }
 private:
   std::vector<std::shared_ptr<Block>> blocks;
@@ -211,6 +245,7 @@ private:
   std::shared_ptr<Block> nextBlock;
   double lastUpdateTime = 0;
   bool gameOver = false;
+  int score = 0;
   
   
 };

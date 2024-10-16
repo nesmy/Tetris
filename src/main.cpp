@@ -6,7 +6,7 @@ using namespace BB;
 
 int main(void){
   int retVal = EXIT_SUCCESS;
-  Application<Tetris> App(300, 600, "Tetris");
+  Application<Tetris> App(500, 620, "Tetris");
   
   
   try{
