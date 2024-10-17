@@ -10,7 +10,7 @@
 class Tetris : public BB::Scene{
  public:
   Tetris(){
-    test = LoadMusicStream("Resources/Sounds/music.mp3");
+    
   }
 
   virtual ~Tetris(){
@@ -18,10 +18,12 @@ class Tetris : public BB::Scene{
 
   virtual void loadResources() override{
     BB::ResourceManager::LoadFont("Resources/Font/monogram.ttf", "monogram");
-    // PlayMusicStream(BB::ResourceManager::LoadMusic("Resources/Sounds/music.mp3", "Music"));
-    PlayMusicStream(test);
-    // BB::ResourceManager::LoadSound("Resources/Sounds/rotate.mp3", "RotateSound");
-    // BB::ResourceManager::LoadSound("Resources/Sounds/clear.mp3", "ClearSound");
+    PlayMusicStream(BB::ResourceManager::LoadMusic("Resources/Sounds/music.mp3", "Music"));
+    BB::ResourceManager::LoadSound("Resources/Sounds/coin.mp3", "CoinSound");
+    BB::ResourceManager::LoadSound("Resources/Sounds/rotate.mp3", "RotateSound");
+    BB::ResourceManager::LoadSound("Resources/Sounds/over.mp3", "OverSound");
+    BB::ResourceManager::LoadSound("Resources/Sounds/clear.mp3", "ClearSound");
+    
     grid = std::make_unique<Grid>();
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
@@ -99,14 +101,14 @@ class Tetris : public BB::Scene{
 
   virtual std::shared_ptr<BB::Scene> update() override {
     BB::Scene::update();
-    // UpdateMusicStream(BB::ResourceManager::GetMusic("Music"));
-    UpdateMusicStream(test);
+    UpdateMusicStream(BB::ResourceManager::GetMusic("Music"));
     handleInput();
     if(EventTriggered(0.2)){
       MoveBlockDown();
     }
 
     if(gameOver){
+      PlaySound(BB::ResourceManager::GetSound("OverSound"));
       gameOver = false;
       Reset();
       return BB::ResourceManager::GetScene("Over");
@@ -209,7 +211,7 @@ private:
         }
         else
         {
-	  // PlaySound(BB::ResourceManager::GetSound("RotateSound"));
+	  PlaySound(BB::ResourceManager::GetSound("RotateSound"));
         }
     }
   }
@@ -220,6 +222,7 @@ private:
         grid->grid[item.row][item.column] = currentBlock->id;
     }
     currentBlock = nextBlock;
+
     if (BlockFits() == false)
     {
         gameOver = true;
@@ -228,8 +231,11 @@ private:
     int rowsCleared = grid->ClearFullRows();
     if (rowsCleared > 0)
     {
-      // PlaySound(BB::ResourceManager::GetSound("ClearSound"));
+      PlaySound(BB::ResourceManager::GetSound("ClearSound"));
       UpdateScore(rowsCleared, 0);
+    }
+    else{
+      PlaySound(BB::ResourceManager::GetSound("CoinSound"));
     }
   }
   bool BlockFits(){
@@ -257,7 +263,6 @@ private:
   double lastUpdateTime = 0;
   bool gameOver = false;
   bool paused = false;
-  Music test;
   int score = 0;
   
   

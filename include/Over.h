@@ -36,14 +36,14 @@ class OverMenuScene : public BB::Scene{
     int sceneWidth = GetScreenWidth();
     int sceneHeight = GetScreenHeight();
 
-    const char *title = "Game Over";
+    const char *title = "GameOver";
     Font titleFont = BB::ResourceManager::GetFont("monogram");
-    Vector2 titleDim = MeasureTextEx(titleFont, title, TITLE_FONT_SIZE, TITLE_FONT_SPACING);
+    Vector2 titleDim = MeasureTextEx(titleFont, title, SUB_TITLE_FONT_SIZE, TITLE_FONT_SPACING);
 
     int titleLeft = (sceneWidth - titleDim.x) / 2;
     int titleTop = sceneHeight / 4 - titleDim.y / 2;
     Vector2 titlePos = Vector2{(float)titleLeft, (float)titleTop};
-    ::DrawTextEx(titleFont, title, titlePos, TITLE_FONT_SIZE, TITLE_FONT_SPACING, RED);
+    ::DrawTextEx(titleFont, title, titlePos, SUB_TITLE_FONT_SIZE, TITLE_FONT_SPACING, RED);
 
     int menuLeft = (sceneWidth - BUTTON_WIDTH) / 2;
     int menuTop = sceneHeight / 2;

@@ -1,6 +1,7 @@
 #pragma once
 #include "ResourceManager.h"
 #include "Scene.h"
+#include "Colors.h"
 
 class MenuScene : public BB::Scene{
  public:
@@ -28,7 +29,7 @@ class MenuScene : public BB::Scene{
 
   virtual void Draw() override{
     BB::Scene::Draw();
-
+    ClearBackground(lightBlue);
     int sceneWidth = GetScreenWidth();
     int sceneHeight = GetScreenHeight();
 

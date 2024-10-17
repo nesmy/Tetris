@@ -2,17 +2,20 @@
 
 #include "ResourceManager.h"
 #include "Scene.h"
+#include "Colors.h"
 
 class StartScene : public BB::Scene{
  public:
   StartScene(){
     start = false;
+    PlayMusicStream(BB::ResourceManager::LoadMusic("Resources/Sounds/music2.mp3", "Music2"));
   }
 
   virtual ~StartScene() override{
   }
 
-  virtual std::shared_ptr<BB::Scene> update(){
+  virtual std::shared_ptr<BB::Scene> update() override{
+    UpdateMusicStream(BB::ResourceManager::GetMusic("Music2"));
     if(start){
       start = false;
       BB::ResourceManager::GetScene("Game")->loadResources();
@@ -26,6 +29,7 @@ class StartScene : public BB::Scene{
 
   virtual void Draw() override{
     BB::Scene::Draw();
+    ClearBackground(lightBlue);
 
     int sceneWidth = GetScreenWidth();
     int sceneHeight = GetScreenHeight();
