@@ -10,6 +10,7 @@
 class Tetris : public BB::Scene{
  public:
   Tetris(){
+    test = LoadMusicStream("Resources/Sounds/music.mp3");
   }
 
   virtual ~Tetris(){
@@ -17,9 +18,10 @@ class Tetris : public BB::Scene{
 
   virtual void loadResources() override{
     BB::ResourceManager::LoadFont("Resources/Font/monogram.ttf", "monogram");
-    PlayMusicStream(BB::ResourceManager::LoadMusic("Resources/Sounds/music.mp3", "Music"));
-    BB::ResourceManager::LoadSound("Resources/Sounds/rotate.mp3", "RotateSound");
-    BB::ResourceManager::LoadSound("Resources/Sounds/clear.mp3", "ClearSound");
+    // PlayMusicStream(BB::ResourceManager::LoadMusic("Resources/Sounds/music.mp3", "Music"));
+    PlayMusicStream(test);
+    // BB::ResourceManager::LoadSound("Resources/Sounds/rotate.mp3", "RotateSound");
+    // BB::ResourceManager::LoadSound("Resources/Sounds/clear.mp3", "ClearSound");
     grid = std::make_unique<Grid>();
     blocks = GetAllBlocks();
     currentBlock = GetRandomBlock();
@@ -74,35 +76,44 @@ class Tetris : public BB::Scene{
 
   void handleInput(){
     int keyPressed = GetKeyPressed();
-    if (gameOver && keyPressed != 0)
-    {
-        gameOver = false;
-        Reset();
-    }
     switch (keyPressed)
     {
     case KEY_LEFT:
-        MoveBlockLeft();
-        break;
+      MoveBlockLeft();
+      break;
     case KEY_RIGHT:
-        MoveBlockRight();
-        break;
+      MoveBlockRight();
+      break;
     case KEY_DOWN:
-        MoveBlockDown();
-        UpdateScore(0, 1);
-        break;
+      MoveBlockDown();
+      UpdateScore(0, 1);
+      break;
     case KEY_UP:
-        RotateBlock();
-        break;
+      RotateBlock();
+      break;
+    case KEY_ESCAPE:
+      paused = true;
+      break;
     }
   }
 
   virtual std::shared_ptr<BB::Scene> update() override {
     BB::Scene::update();
-    UpdateMusicStream(BB::ResourceManager::GetMusic("Music"));
+    // UpdateMusicStream(BB::ResourceManager::GetMusic("Music"));
+    UpdateMusicStream(test);
     handleInput();
     if(EventTriggered(0.2)){
       MoveBlockDown();
+    }
+
+    if(gameOver){
+      gameOver = false;
+      Reset();
+      return BB::ResourceManager::GetScene("Over");
+    }
+    else if(paused){
+      paused = false;
+      return BB::ResourceManager::GetScene("Menu");
     }
     return nullptr;
   }
@@ -198,7 +209,7 @@ private:
         }
         else
         {
-	  PlaySound(BB::ResourceManager::GetSound("RotateSound"));
+	  // PlaySound(BB::ResourceManager::GetSound("RotateSound"));
         }
     }
   }
@@ -217,7 +228,7 @@ private:
     int rowsCleared = grid->ClearFullRows();
     if (rowsCleared > 0)
     {
-      PlaySound(BB::ResourceManager::GetSound("ClearSound"));
+      // PlaySound(BB::ResourceManager::GetSound("ClearSound"));
       UpdateScore(rowsCleared, 0);
     }
   }
@@ -245,6 +256,8 @@ private:
   std::shared_ptr<Block> nextBlock;
   double lastUpdateTime = 0;
   bool gameOver = false;
+  bool paused = false;
+  Music test;
   int score = 0;
   
   
